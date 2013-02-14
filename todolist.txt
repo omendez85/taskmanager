@@ -1,0 +1,19 @@
+/**
+
+	TODO:
+	- Task
+		- addTask()
+		- deleteTask()
+		- resolveTask()
+		- editTask()
+		- updateTask()
+		- listTasks()
+		- addUser()
+		- editUser()
+
+	- User (Name, id)
+		- addUser()
+		- deleteUser()
+		- editUser()
+
+**/
