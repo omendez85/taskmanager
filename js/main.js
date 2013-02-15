@@ -9,70 +9,132 @@ window.userManager = {
 	users : [],
 	initialize: function(user){
 		if(user.length != 0){
-			for(i=0; i <= user.length; i++){
-				User = {'id': user[i].id, 'name' : user[i].name};
-				var tmpl;
-				//$.get('js/templates/user.html',function(d){tmpl = d});
-				tmpl = '<ul><li>{{name}}</li><li><button class="edituser" value="{{id}}">Edit User</button></li><li><button class="deluser" value="{{id}}" >Delete User</button></li></ul>';
-				//tmpl = $("#userlst").innerHTML; 
-				var renderedPage = Mustache.render( tmpl, User );
-				$(".users_list").append(renderedPage);
+			for(i=0; i < user.length; i++){
+				userManager.addUser(user[i]);
 			}
 		}else{
 			$(".users_list").append("NO USERS");
 		}
-		
+		$(".add_user").click( function(){
+            userManager.newUser();
+        });
 	},
-	deleteUser: function(){
-		// if(this.id != 0 && this.id != ""){
-		// 	//delte user
-		// }
+	newUser: function(){
+		var tmpl;
+
+		$.get("js/templates/newuser.html", function(data) {
+		  	var renderedPage = Mustache.render(data);
+			$(".view_user").html(renderedPage);
+			
+			$(".new_form").submit( function(e){
+				e.preventDefault();
+				var new_user = $(".new_form .name").val();
+				id = userManager.users.length + 1;
+
+				var user = {'id': id,'name' : new_user};
+				userManager.users.push(user);
+
+				$(".view_user").html("USER " + new_user + " ADDED");
+				$(".users_list").html("");
+				for(j=0; j < userManager.users.length; j++){
+					userManager.listUsers(userManager.users[j]);
+				}
+			});
+		});	
+	},
+	addUser: function(user){
+		userManager.users.push(user);
+		var tmpl;
+
+		$.get("js/templates/user.html", function(data) {
+		  	var renderedPage = Mustache.render(data,user);
+			$(".users_list").append(renderedPage);
+
+			$(".edituser").click( function(){
+	            var userid = $(this).val();
+	            userManager.editUser(userid);
+	        });
+	        
+	        $(".deluser").click( function(){
+	            var userid = $(this).val();
+	            userManager.deleteUser(userid);
+	        });
+		});        
+	},
+	listUsers: function(user){
+		$.get("js/templates/user.html", function(data) {
+		  	var renderedPage = Mustache.render(data,user);
+			$(".users_list").append(renderedPage);
+			
+			$(".edituser").click( function(){
+	            var userid = $(this).val();
+	            userManager.editUser(userid);
+	        });
+	        
+	        $(".deluser").click( function(){
+	            var userid = $(this).val();
+	            userManager.deleteUser(userid);
+	        });
+		});
+	},	
+	deleteUser: function(userid){
+		if(userManager.users.length != 0){
+			for(i=0; i < userManager.users.length; i++){
+				if(userManager.users[i].id == userid){
+					var tmpl, arraypos, user;
+					user = userManager.users[i];
+					arraypos = i;
+					$.get("js/templates/deluser.html", function(data) {
+					  	var renderedPage = Mustache.render(data,user);
+						$(".view_user").html(renderedPage);
+						
+						$(".del_cancel_user").click( function(e){
+							e.preventDefault();
+							$(".view_user").html("");
+						});
+
+						$(".del_form").submit( function(e){
+							e.preventDefault();
+							$(".view_user").html("USER " +userManager.users[arraypos].name + " DELETED");
+							userManager.users.splice(arraypos,1);
+							$(".users_list").html("");
+							for(j=0; j < userManager.users.length; j++){
+								userManager.listUsers(userManager.users[j]);
+							}
+						});
+					});
+				}
+			}
+		}
 	},
 	editUser: function(userid){
-		// LLAMADO AJAX A LA DB PARA TRAER EL USUARIO JSON
-		var User = {
-			'id': userid,
-		    'name' : 'mendez'
-			};
-		var edituser;
-		//edituser = '<form action="#" class="edit_form">';
-		edituser = '<div class="edit_form">';
-		edituser += 'Name: <input type="name" value="'+User.name+'" />';
-		edituser += '<input type="hidden" class="user_id" value="'+User.id+'" />';
-		edituser += '<button class="save_user">Save</button>';
-		edituser += '</div>';
-		//edituser += '</form>';
+		$(".view_user").html("");
+		if(userManager.users.length != 0){
+			for(i=0; i < userManager.users.length; i++){
+				if(userManager.users[i].id == userid){
+					user = userManager.users[i];
+					var tmpl, arraypos;
+					arraypos = i;
 
-
-		$(document.createElement("form"))
-			.attr("class","edit_form")
-			.submit(function(e){ 
-					e.preventDefault();
-					alert("click"); 
-				})
-			.appendTo("div.view_user");
-
-		$(document.createElement("input"))
-			.attr({class:"edit_form",type:"edit_form"})
-			.appendTo("form.edit_form");
-
-		// var divedit = document.createElement('div');
-		// divedit.setAttribute("class", "edit_form"); 
-		
-		// var buttomedit = document.createElement('button');
-		// buttomedit.setAttribute("value", "send"); 
-		// buttomedit.setAttribute("class", "save_user"); 
-		// var t=document.createTextNode("CLICK ME");
-		// buttomedit.appendChild(t);
-
-		// divedit.appendChild(buttomedit);
-		// document.getElementById("view_user").appendChild(divedit);
-		//$(document.body).append('<div class="mie">asd</div>');
-		$(document.createElement("button")).attr("class","save_user").text("Test Link 2").click(function(){ alert("click"); }).appendTo("div.view_user");
-	},
-	saveEditUser: function(userid){
-		// LLAMADO AJAX A LA DB PARA GUARDAR LOS DATOS
-		$(".view_user").html('USER '+userid+' SAVE');
+					$.get("js/templates/edituser.html", function(data) {
+					  	var renderedPage = Mustache.render( data, user );
+						$(".view_user").html(renderedPage);
+						$(".edit_form").submit( function(e){
+							e.preventDefault();
+							var edit_user = $(".edit_form .name").val();
+							userManager.users[arraypos].name = edit_user;
+							$(".view_user").html("User " + userManager.users[arraypos].name + " saved");
+							$(".users_list").html("");
+							for(j=0; j < userManager.users.length; j++){
+								userManager.listUsers(userManager.users[j]);
+							}
+						});
+					});
+				}
+			}
+		}else{
+			$(".view_user").html("NO USERS");
+		}		
 	}
 };
 

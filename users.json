@@ -1,0 +1,11 @@
+var User = [{
+	'id': 0,
+    'name' : 'oscar'
+	},{
+	'id': 1,
+    'name' : 'Javier'
+	},{
+	'id': 2,
+    'name' : 'mendez'
+	}
+];
