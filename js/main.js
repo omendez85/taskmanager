@@ -35,10 +35,8 @@ window.userManager = {
 				userManager.users.push(user);
 
 				$(".view_user").html("USER " + new_user + " ADDED");
-				$(".users_list").html("");
-				for(j=0; j < userManager.users.length; j++){
-					userManager.listUsers(userManager.users[j]);
-				}
+				renderuser = userManager.listUsers(user);
+				$(".users_list").append(renderuser);
 			});
 		});	
 	},
@@ -76,6 +74,22 @@ window.userManager = {
 	            userManager.deleteUser(userid);
 	        });
 		});
+	},
+	updateUser: function(user){
+		$.get("js/templates/updateuser.html", function(data) {
+		  	var renderedPage = Mustache.render(data,user);
+			$(".users_list .user_"+user.id+"").html(renderedPage);
+			
+			$(".edituser").click( function(){
+	            var userid = $(this).val();
+	            userManager.editUser(userid);
+	        });
+	        
+	        $(".deluser").click( function(){
+	            var userid = $(this).val();
+	            userManager.deleteUser(userid);
+	        });
+		});
 	},	
 	deleteUser: function(userid){
 		if(userManager.users.length != 0){
@@ -97,10 +111,7 @@ window.userManager = {
 							e.preventDefault();
 							$(".view_user").html("USER " +userManager.users[arraypos].name + " DELETED");
 							userManager.users.splice(arraypos,1);
-							$(".users_list").html("");
-							for(j=0; j < userManager.users.length; j++){
-								userManager.listUsers(userManager.users[j]);
-							}
+							$(".users_list .user_"+arraypos+"").remove();
 						});
 					});
 				}
@@ -124,10 +135,7 @@ window.userManager = {
 							var edit_user = $(".edit_form .name").val();
 							userManager.users[arraypos].name = edit_user;
 							$(".view_user").html("User " + userManager.users[arraypos].name + " saved");
-							$(".users_list").html("");
-							for(j=0; j < userManager.users.length; j++){
-								userManager.listUsers(userManager.users[j]);
-							}
+							userManager.updateUser(userManager.users[arraypos]);
 						});
 					});
 				}
